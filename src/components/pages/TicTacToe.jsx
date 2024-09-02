@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
-import { useState, useCallback } from "react";
+import { useState } from "react";
+import useCheckWinner from "./CheckWinner";
 import "./TicTacToe.css";
 
 const Box = ({ onClick, symbolPath }) => {
@@ -10,10 +11,22 @@ const Box = ({ onClick, symbolPath }) => {
   );
 };
 
+const WinnerMessage = ({ winner }) => {
+  return (
+    <div className={`winner-message ${winner ? "" : "hidden"}`}>
+      <span className="winner-text">
+        {winner === " " ? "Empate!" : `${winner} Ganó!`}
+      </span>
+    </div>
+  );
+};
+
 export function TicTacToe() {
   const [boxes, setBoxes] = useState(Array(9).fill(null));
+  const [board, setBoard] = useState(Array(9).fill(null));
   const [isPlayerOneTurn, setIsPlayerOneTurn] = useState(true);
-  const [gamePattern, setGamePattern] = useState({ P1: [], P2: [] });
+
+  const winner = useCheckWinner(board);
 
   const handleBoxClick = (index) => {
     if (boxes[index]) return; // No hacer nada si la casilla ya está ocupada
@@ -25,52 +38,19 @@ export function TicTacToe() {
 
     newBoxes[index] = symbolPath;
 
-    // Actualizar el patrón del juego
-    setGamePattern((prevGamePattern) => ({
-      ...prevGamePattern,
-      [isPlayerOneTurn ? "P1" : "P2"]: [
-        ...prevGamePattern[isPlayerOneTurn ? "P1" : "P2"],
-        index,
-      ],
-    }));
+    const newBoard = [...board];
+    const newIndex = index;
+    const newValue = isPlayerOneTurn ? "X" : "O";
+    newBoard[newIndex] = newValue;
 
     setBoxes(newBoxes);
+    setBoard(newBoard);
     setIsPlayerOneTurn(!isPlayerOneTurn);
-
-    // Verificar el ganador después de actualizar el estado
-    checkWinner(newBoxes, isPlayerOneTurn ? "P1" : "P2");
   };
-
-  const checkWinner = useCallback(
-    (newBoxes, currentPlayer) => {
-      const winningPatterns = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6],
-      ];
-
-      const currentPlayerPattern = gamePattern[currentPlayer];
-
-      const hasWinner = winningPatterns.some((pattern) =>
-        pattern.every((index) => currentPlayerPattern.includes(index))
-      );
-
-      if (hasWinner) {
-        alert(`${currentPlayer === "P1" ? "Player 1" : "Player 2"} wins!`);
-        resetGame();
-      }
-    },
-    [gamePattern]
-  );
 
   const resetGame = () => {
     setBoxes(Array(9).fill(null));
-    setGamePattern({ P1: [], P2: [] });
+    setBoard(Array(9).fill(null));
     setIsPlayerOneTurn(true); // Inicia el juego con el turno del Jugador 1
   };
 
@@ -85,6 +65,7 @@ export function TicTacToe() {
           />
         ))}
       </div>
+      <WinnerMessage winner={winner} hidden={winner} />
       <button className="reset-button" onClick={resetGame}>
         Reset
       </button>
@@ -95,6 +76,11 @@ export function TicTacToe() {
 Box.propTypes = {
   onClick: PropTypes.func.isRequired,
   symbolPath: PropTypes.string,
+};
+
+WinnerMessage.propTypes = {
+  winner: PropTypes.string,
+  hidden: PropTypes.string,
 };
 
 export default TicTacToe;
