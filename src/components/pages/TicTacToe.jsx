@@ -1,6 +1,5 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
-import useCheckWinner from "./CheckWinner";
 import "./TicTacToe.css";
 
 const Box = ({ onClick, symbolPath }) => {
@@ -11,25 +10,36 @@ const Box = ({ onClick, symbolPath }) => {
   );
 };
 
-const WinnerMessage = ({ winner }) => {
-  return (
-    <div className={`winner-message ${winner ? "" : "hidden"}`}>
-      <span className="winner-text">
-        {winner === " " ? "Empate!" : `${winner} Ganó!`}
-      </span>
-    </div>
-  );
-};
-
 export function TicTacToe() {
   const [boxes, setBoxes] = useState(Array(9).fill(null));
   const [board, setBoard] = useState(Array(9).fill(null));
   const [isPlayerOneTurn, setIsPlayerOneTurn] = useState(true);
 
-  const winner = useCheckWinner(board);
+  const checkWinner = (board) => {
+    const winningPattern = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+
+    for (let i = 0; i < winningPattern.length; i++) {
+      const [a, b, c] = winningPattern[i];
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const hasWinner = checkWinner(board);
 
   const handleBoxClick = (index) => {
-    if (boxes[index]) return; // No hacer nada si la casilla ya está ocupada
+    if (boxes[index] || hasWinner) return; // No hacer nada si la casilla ya está ocupada
 
     const newBoxes = boxes.slice();
     const symbolPath = isPlayerOneTurn
@@ -65,7 +75,7 @@ export function TicTacToe() {
           />
         ))}
       </div>
-      <WinnerMessage winner={winner} hidden={winner} />
+
       <button className="reset-button" onClick={resetGame}>
         Reset
       </button>
@@ -76,11 +86,6 @@ export function TicTacToe() {
 Box.propTypes = {
   onClick: PropTypes.func.isRequired,
   symbolPath: PropTypes.string,
-};
-
-WinnerMessage.propTypes = {
-  winner: PropTypes.string,
-  hidden: PropTypes.string,
 };
 
 export default TicTacToe;
