@@ -7,7 +7,7 @@ import CustomHook from "./CustomHook";
 import FocusableInput from "./FocusableInput";
 // import UglyClass from "./UglyClass";
 import FancyButton from "../small/FancyButton";
-// import TicTacToe from "./TicTacToe";
+import TicTacToe from "./TicTacToe";
 
 const pages = {
   home: {
@@ -29,6 +29,10 @@ const pages = {
   focusableInput: {
     name: "Focusable Input",
     component: FocusableInput,
+  },
+  ticTacToe: {
+    name: "Tic Tac Toe",
+    component: TicTacToe,
   },
 };
 
